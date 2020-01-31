@@ -10,5 +10,21 @@
 
 // Call the parent constructor when initializing your constructor and pass in array_size. Then
 // use num_threads to cap off how many threads you use to calculate all prime numbers
+class PCalc_T : PCalc { 
+    public:
+        PCalc_T(unsigned int array_size, unsigned int num_threads);
+        ~PCalc_T();
 
+        void markNonPrimes();
+        void printPrimes(const char *filename);
+
+        void cleanup();
+
+    protected:
+
+
+    private:
+ 
+
+};
 #endif
