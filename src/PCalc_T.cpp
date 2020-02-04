@@ -3,14 +3,16 @@
 #include <math.h>
 #include <thread>
 #include <iostream>
+#include <unistd.h>
 
 struct thread_data {
     pthread_t thread;
     unsigned int threadpos;
     PCalc_T *parray;
+    int start;
 };
 
-PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(array_size), num_threads(num_threads) {
+PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(array_size), _num_threads(num_threads) {
 
 }
 
@@ -19,19 +21,36 @@ PCalc_T::~PCalc_T() {
 }
 
 void PCalc_T::markNonPrimes() {
+    int spawnedThreads = 0;
+    thread_data threads[_num_threads];
+    int n = PCalc::array_size();
+
     PCalc::at(0) = false;
     PCalc::at(1) = false;
 
-    thread_data threads[num_threads];
-
-    for(int i = 0; i < num_threads; i++) {
+    for(int i = 0; i < _num_threads; i++) {
        threads[i].threadpos = i;
        threads[i].parray = this;
-
-       pthread_create(&threads[i].thread, NULL, PCalc_T::t_markprimes, &threads[i]);
     }
 
-    for(int i = 0; i < num_threads; i++) {
+
+    
+    for(int i = 2; i < sqrt(n); i++) {
+        if(PCalc::at(i)) {
+            if(spawnedThreads < _num_threads) {
+                threads[spawnedThreads].start = i;
+                _min_thread = i;
+                pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
+                spawnedThreads++;
+            } else {
+                for(int j = i*i; j < n; j += i) {
+                    PCalc::at(j) = false;
+                } 
+            }
+        }
+    }
+
+    for(int i = 0; i < _num_threads; i++) {
        pthread_join(threads[i].thread, NULL);
     }
 }
@@ -39,13 +58,18 @@ void PCalc_T::markNonPrimes() {
 void *PCalc_T::t_markprimes(void *prt) {
     thread_data *thread = static_cast<thread_data *>(prt);
 
+    int i = thread->start;
     int n = thread->parray->array_size();
-    for(int i = thread->threadpos+2; i < sqrt(n); i++) {
-        if(thread->parray->at(i)) {
-            for(int j = i*i; j < n; j += i) {
-                thread->parray->at(j) = false;
-            }
-        }
+
+    // while(true) {
+    //     std::cout << thread->parray->_min_thread << "\n";
+    //     if(thread->parray->_min_thread > i)
+    //         break;
+    //     else
+    //         usleep(1);
+    // }
+    for(int j = i*i; j < n; j += i) {
+        thread->parray->at(j) = false;
     }
 }
 

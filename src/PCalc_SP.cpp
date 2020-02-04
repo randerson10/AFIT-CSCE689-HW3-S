@@ -15,7 +15,6 @@ void PCalc_SP::markNonPrimes() {
     PCalc::at(1) = false;
 
     int n = PCalc::array_size();
-    //int sqrtN = (int)sqrt(double(n));
     for(int i = 2; i < sqrt(n); i++) {
         if(PCalc::at(i)) {
             for(int j = i*i; j < n; j += i) {
