@@ -2,6 +2,9 @@
 #define PCALC_T_H
 
 #include "PCalc.h"
+#include <pthread.h>
+
+
 
 // Your implementation of PCalc_T class should go here. 
 // Make sure your constructor takes in two parameters:
@@ -21,10 +24,10 @@ class PCalc_T : PCalc {
         void cleanup();
 
     protected:
-
+        static void *t_markprimes(void *prt);
 
     private:
- 
-
+        unsigned int num_threads;
+        //thread_data threads[];
 };
 #endif

@@ -29,9 +29,6 @@ class PCalc {
       bool &operator [] (unsigned int x);
       bool &at(unsigned int x);
 
-      // Set the prime boolean element at x to false
-      void clrPrime(unsigned int x);
-
       unsigned int array_size() { return asize; };
 
       // if you overload, don't forget to call me

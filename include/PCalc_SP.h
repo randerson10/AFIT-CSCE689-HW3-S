@@ -10,7 +10,6 @@
 // getting this working first, then tackling multithreaded
 class PCalc_SP : PCalc { 
     public:
-        PCalc_SP();
         PCalc_SP(unsigned int array_size);
         ~PCalc_SP();
 
