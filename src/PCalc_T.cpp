@@ -39,7 +39,7 @@ void PCalc_T::markNonPrimes() {
         if(PCalc::at(i)) {
             if(spawnedThreads < _num_threads) {
                 threads[spawnedThreads].start = i;
-                _min_thread = i;
+                _min_thread = i*i;
                 pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
                 spawnedThreads++;
             } else {
@@ -61,13 +61,13 @@ void *PCalc_T::t_markprimes(void *prt) {
     int i = thread->start;
     int n = thread->parray->array_size();
 
-    // while(true) {
-    //     std::cout << thread->parray->_min_thread << "\n";
-    //     if(thread->parray->_min_thread > i)
-    //         break;
-    //     else
-    //         usleep(1);
-    // }
+    while(true) {
+        std::cout << thread->parray->_min_thread << "\n";
+        if(thread->parray->_min_thread > i)
+            break;
+        else
+            usleep(1);
+    }
     for(int j = i*i; j < n; j += i) {
         thread->parray->at(j) = false;
     }
