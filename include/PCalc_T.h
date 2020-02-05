@@ -27,7 +27,7 @@ class PCalc_T : PCalc {
         static void *t_markprimes(void *prt);
 
     private:
-        unsigned int num_threads;
-        //thread_data threads[];
+        unsigned int _num_threads;
+        int _min_thread;
 };
 #endif
