@@ -2,7 +2,6 @@
 #include <pthread.h>
 #include <math.h>
 #include <thread>
-#include <iostream>
 #include <unistd.h>
 
 
