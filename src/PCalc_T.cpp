@@ -67,6 +67,14 @@ void PCalc_T::markNonPrimes() {
 void *PCalc_T::t_markprimes(void *prt) {
     thread_data *thread = static_cast<thread_data *>(prt);
     int n = thread->parray->array_size();
+
+    while(true) {
+        //std::cout << "sleeping\n";
+        if(thread->parray->_min_thread < thread->currentIndex)
+            usleep(1);
+        else
+            break;
+    }
     
     while(thread->currentIndex < sqrt(n)) {
         
@@ -78,13 +86,7 @@ void *PCalc_T::t_markprimes(void *prt) {
 
         thread->currentIndex = thread->parray->_max_thread + 1;
 
-        while(true) {
-            std::cout << "sleeping\n";
-            if(thread->parray->_min_thread < thread->currentIndex)
-                usleep(1);
-            else
-                break;
-        }
+
         
 
         
