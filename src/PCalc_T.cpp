@@ -76,10 +76,6 @@ void *PCalc_T::t_markprimes(void *prt) {
     unsigned int n = thread->parray->array_size();
     unsigned int srt = std::sqrt(n);
 
-    //sleep until the threads that need to go before me has gone
-    while(thread->parray->_min_thread < thread->currentIndex)
-        usleep(1);
-
     //sieve algorithm
     while(thread->currentIndex < srt) {
         if(thread->parray->at(thread->currentIndex)) {
