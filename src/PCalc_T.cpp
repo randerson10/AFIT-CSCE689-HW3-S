@@ -5,92 +5,96 @@
 #include <iostream>
 #include <unistd.h>
 
-    struct thread_data {
-        pthread_t thread;
-        unsigned int threadpos;
-        PCalc_T *parray;
-        int currentStart;
-    };
+
+/************************************************************************************************
+ * PCalc_T (constructor) - Creates an array of primelist boolean objects with the size of
+ *                       array_size and initializes them all to true. Also initializes number of
+ *                       threads and the thread struct object.
+ ************************************************************************************************/
 
 PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(array_size), _num_threads(num_threads) {
-
+    threads[_num_threads];
 }
+
+/************************************************************************************************
+ * PCalc_T (destructor) - deletes the primelist array
+ ************************************************************************************************/
 
 PCalc_T::~PCalc_T() {
    cleanup();
 }
 
-void PCalc_T::markNonPrimes() {
-    int spawnedThreads = 0;
-    thread_data threads[_num_threads];
-    int n = PCalc::array_size();
+/************************************************************************************************
+ * markNonPrimes - sets all non primes numbers in primelist to false utililizing the number of 
+                   alloted threads.
+ ************************************************************************************************/
 
+void PCalc_T::markNonPrimes() {
     PCalc::at(0) = false;
     PCalc::at(1) = false;
 
     for(int i = 0; i < _num_threads; i++) {
        threads[i].threadpos = i;
        threads[i].parray = this;
-       threads[i].currentStart = i+2;
-       pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
+       threads[i].currentIndex = i+2;
+       pthread_create(&threads[i].thread, NULL, PCalc_T::t_markprimes, &threads[i]);
     }
 
-
-    
-    // for(int i = 2; i < sqrt(n); i++) {
-    //     if(PCalc::at(i)) {
-    //         if(spawnedThreads < _num_threads) {
-    //             threads[spawnedThreads].start = i;
-    //             _min_thread = i*i;
-    //             pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
-    //             spawnedThreads++;
-    //         } else {
-    //             for(int j = i*i; j < n; j += i) {
-    //                 PCalc::at(j) = false;
-    //             } 
-    //         }
-    //     }
-    // }
 
     for(int i = 0; i < _num_threads; i++) {
        pthread_join(threads[i].thread, NULL);
     }
 }
 
+/************************************************************************************************
+ * t_markprimes - worker function for each thread that sets the non primes in prime list to false.
+ ************************************************************************************************/
+
 void *PCalc_T::t_markprimes(void *prt) {
     thread_data *thread = static_cast<thread_data *>(prt);
     int n = thread->parray->array_size();
     
-    int threadStartValue = thread->currentStart;
-    
-
-    // while(true) {
-    //     std::cout << thread->parray->_min_thread << "\n";
-    //     if(thread->parray->_min_thread > i)
-    //         break;
-    //     else
-    //         usleep(1);
-    // }
-
-   // while(threadStartValue < sqrt(n)) {
-        for(int i = threadStartValue; i < sqrt(n); i++) {
-            if(thread->parray->at(i)) {
-                for(int j = i*i; j < n; j += i) {
-                    thread->parray->at(j) = false;
-                }
+    while(thread->currentIndex < sqrt(n)) {
+        
+        if(thread->parray->at(thread->currentIndex)) {
+            for(int j = thread->currentIndex*thread->currentIndex; j < n; j += thread->currentIndex) {
+                thread->parray->at(j) = false;
             }
         }
-        for(int v = 0; v < _num_threads; v++) {
 
-        }
-   // }
+        thread->currentIndex++;
+
+        if(thread->parray->_min_thread < thread->currentIndex)
+            usleep(1);
+
+        thread->parray->_min_thread = thread->currentIndex;
+
+        
+        // int max = 0;
+        // for(int v = 0; v < thread->parray->_num_threads; v++) {
+        //     if(thread->parray->threads[v].currentIndex > max)
+        //         max = thread->parray->threads[v].currentIndex;
+
+        // }
+        // thread->currentIndex = max + 1;
+    }
     
 }
 
+/************************************************************************************************
+ * printPrimes - outputs the prime values to the file specified
+ *
+ *    Params:  filename - the path/filename of the output file
+ *
+ ************************************************************************************************/
 
 void PCalc_T::printPrimes(const char *filename) {
     PCalc::printPrimes(filename);
 }
+
+/************************************************************************************************
+ * cleanup - cleans up memory from this object
+ ************************************************************************************************/
 
 void PCalc_T::cleanup() {
     PCalc::cleanup();

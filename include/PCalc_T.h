@@ -14,7 +14,12 @@
 // Call the parent constructor when initializing your constructor and pass in array_size. Then
 // use num_threads to cap off how many threads you use to calculate all prime numbers
 class PCalc_T : PCalc { 
-
+    struct thread_data {
+        pthread_t thread;
+        unsigned int threadpos;
+        PCalc_T *parray;
+        int currentIndex;
+    };
 
     public:
         PCalc_T(unsigned int array_size, unsigned int num_threads);
@@ -31,7 +36,7 @@ class PCalc_T : PCalc {
     private:
         unsigned int _num_threads;
         int _min_thread = 2;
-        //struct thread_data threads[_num_threads];
+        thread_data threads[];
 };
 
 
