@@ -5,12 +5,12 @@
 #include <iostream>
 #include <unistd.h>
 
-struct thread_data {
-    pthread_t thread;
-    unsigned int threadpos;
-    PCalc_T *parray;
-    int start;
-};
+    struct thread_data {
+        pthread_t thread;
+        unsigned int threadpos;
+        PCalc_T *parray;
+        int currentStart;
+    };
 
 PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(array_size), _num_threads(num_threads) {
 
@@ -31,24 +31,26 @@ void PCalc_T::markNonPrimes() {
     for(int i = 0; i < _num_threads; i++) {
        threads[i].threadpos = i;
        threads[i].parray = this;
+       threads[i].currentStart = i+2;
+       pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
     }
 
 
     
-    for(int i = 2; i < sqrt(n); i++) {
-        if(PCalc::at(i)) {
-            if(spawnedThreads < _num_threads) {
-                threads[spawnedThreads].start = i;
-                _min_thread = i*i;
-                pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
-                spawnedThreads++;
-            } else {
-                for(int j = i*i; j < n; j += i) {
-                    PCalc::at(j) = false;
-                } 
-            }
-        }
-    }
+    // for(int i = 2; i < sqrt(n); i++) {
+    //     if(PCalc::at(i)) {
+    //         if(spawnedThreads < _num_threads) {
+    //             threads[spawnedThreads].start = i;
+    //             _min_thread = i*i;
+    //             pthread_create(&threads[spawnedThreads].thread, NULL, PCalc_T::t_markprimes, &threads[spawnedThreads]);
+    //             spawnedThreads++;
+    //         } else {
+    //             for(int j = i*i; j < n; j += i) {
+    //                 PCalc::at(j) = false;
+    //             } 
+    //         }
+    //     }
+    // }
 
     for(int i = 0; i < _num_threads; i++) {
        pthread_join(threads[i].thread, NULL);
@@ -57,20 +59,32 @@ void PCalc_T::markNonPrimes() {
 
 void *PCalc_T::t_markprimes(void *prt) {
     thread_data *thread = static_cast<thread_data *>(prt);
-
-    int i = thread->start;
     int n = thread->parray->array_size();
+    
+    int threadStartValue = thread->currentStart;
+    
 
-    while(true) {
-        std::cout << thread->parray->_min_thread << "\n";
-        if(thread->parray->_min_thread > i)
-            break;
-        else
-            usleep(1);
-    }
-    for(int j = i*i; j < n; j += i) {
-        thread->parray->at(j) = false;
-    }
+    // while(true) {
+    //     std::cout << thread->parray->_min_thread << "\n";
+    //     if(thread->parray->_min_thread > i)
+    //         break;
+    //     else
+    //         usleep(1);
+    // }
+
+   // while(threadStartValue < sqrt(n)) {
+        for(int i = threadStartValue; i < sqrt(n); i++) {
+            if(thread->parray->at(i)) {
+                for(int j = i*i; j < n; j += i) {
+                    thread->parray->at(j) = false;
+                }
+            }
+        }
+        for(int v = 0; v < _num_threads; v++) {
+
+        }
+   // }
+    
 }
 
 
