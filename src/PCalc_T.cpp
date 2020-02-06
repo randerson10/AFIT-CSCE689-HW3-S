@@ -14,6 +14,8 @@
 
 PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(array_size), _num_threads(num_threads) {
     threads[_num_threads];
+    _min_thread = 2;
+    _max_thread = _num_threads;
 }
 
 /************************************************************************************************
@@ -75,7 +77,7 @@ void *PCalc_T::t_markprimes(void *prt) {
         else
             break;
     }
-    
+    std::cout << "not sleeping \n";
     while(thread->currentIndex < sqrt(n)) {
         
         if(thread->parray->at(thread->currentIndex)) {
