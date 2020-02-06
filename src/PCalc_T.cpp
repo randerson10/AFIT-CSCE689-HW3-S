@@ -42,11 +42,15 @@ void PCalc_T::markNonPrimes() {
 
     while(_min_thread < PCalc::array_size()) {
         int min = _min_thread;
+        int max = 0;
         for(int i = 0; i < _num_threads; i++) {
             if(threads[i].currentIndex < min)
                 min = threads[i].currentIndex;
+            if(threads[i].currentIndex > max)
+                max = threads[i].currentIndex;
         }
         _min_thread = min;
+        _max_thread = max;
        // std::cout << min << "\n";
     }
 
@@ -72,10 +76,10 @@ void *PCalc_T::t_markprimes(void *prt) {
             }
         }
 
-        thread->currentIndex++;
+        thread->currentIndex = thread->parray->_max_thread + 1;
 
         while(true) {
-            std::cout << "sleeing\n";
+            std::cout << "sleeping\n";
             if(thread->parray->_min_thread < thread->currentIndex)
                 usleep(1);
             else
