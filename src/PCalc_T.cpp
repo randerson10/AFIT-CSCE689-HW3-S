@@ -13,7 +13,7 @@
  ************************************************************************************************/
 
 PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(array_size), _num_threads(num_threads) {
-    threads[_num_threads];
+    threads = new thread_data[_num_threads];
     _min_thread = 2;
     _max_thread = _num_threads;
 }
@@ -23,7 +23,8 @@ PCalc_T::PCalc_T(unsigned int array_size, unsigned int num_threads) : PCalc(arra
  ************************************************************************************************/
 
 PCalc_T::~PCalc_T() {
-   cleanup();
+    delete[] threads;
+    cleanup();
 }
 
 /************************************************************************************************
@@ -35,17 +36,23 @@ void PCalc_T::markNonPrimes() {
     PCalc::at(0) = false;
     PCalc::at(1) = false;
 
-    for(int i = 0; i < _num_threads; i++) {
+    unsigned int asize = PCalc::array_size();
+    unsigned int srt = std::sqrt(asize);
+
+    //spawn the requested number of threads
+    for(unsigned int i = 0; i < _num_threads; i++) {
        threads[i].threadpos = i;
        threads[i].parray = this;
        threads[i].currentIndex = i+2;
        pthread_create(&threads[i].thread, NULL, PCalc_T::t_markprimes, &threads[i]);
     }
 
-    while(_min_thread < PCalc::array_size()) {
-        int min = _min_thread;
-        int max = 0;
-        for(int i = 0; i < _num_threads; i++) {
+    //this block of codes keeps the min and max threads updated so that the worker threads know
+    //what needs to be executed
+    while(_min_thread < srt) {
+        unsigned int min = asize;
+        unsigned int max = 0;
+        for(unsigned int i = 0; i < _num_threads; i++) {
             if(threads[i].currentIndex < min)
                 min = threads[i].currentIndex;
             if(threads[i].currentIndex > max)
@@ -53,11 +60,10 @@ void PCalc_T::markNonPrimes() {
         }
         _min_thread = min;
         _max_thread = max;
-       // std::cout << min << "\n";
     }
 
-
-    for(int i = 0; i < _num_threads; i++) {
+    //wait for all the threads to finish
+    for(unsigned int i = 0; i < _num_threads; i++) {
        pthread_join(threads[i].thread, NULL);
     }
 }
@@ -68,37 +74,22 @@ void PCalc_T::markNonPrimes() {
 
 void *PCalc_T::t_markprimes(void *prt) {
     thread_data *thread = static_cast<thread_data *>(prt);
-    int n = thread->parray->array_size();
+    unsigned int n = thread->parray->array_size();
+    unsigned int srt = std::sqrt(n);
 
-    while(true) {
-        //std::cout << "sleeping\n";
-        if(thread->parray->_min_thread < thread->currentIndex)
-            usleep(1);
-        else
-            break;
-    }
-    std::cout << "not sleeping \n";
-    while(thread->currentIndex < sqrt(n)) {
-        
+    //sleep until the threads that need to go before me has gone
+    while(thread->parray->_min_thread < thread->currentIndex)
+        usleep(1);
+
+    //sieve algorithm
+    while(thread->currentIndex < srt) {
         if(thread->parray->at(thread->currentIndex)) {
-            for(int j = thread->currentIndex*thread->currentIndex; j < n; j += thread->currentIndex) {
+            for(unsigned int j = thread->currentIndex*thread->currentIndex; j < n; j += thread->currentIndex) {
                 thread->parray->at(j) = false;
             }
         }
-
+        //get the next index that needs to be run by this thread
         thread->currentIndex = thread->parray->_max_thread + 1;
-
-
-        
-
-        
-        // int max = 0;
-        // for(int v = 0; v < thread->parray->_num_threads; v++) {
-        //     if(thread->parray->threads[v].currentIndex > max)
-        //         max = thread->parray->threads[v].currentIndex;
-
-        // }
-        // thread->currentIndex = max + 1;
     }
     
 }

@@ -20,17 +20,19 @@ PCalc_SP::~PCalc_SP() {
 }
 
 /************************************************************************************************
- * markNonPrimes - sets all non primes numbers in primelist to false
+ * markNonPrimes - sets all non primes numbers in primelist to false using sieve algorithm
  ************************************************************************************************/
 
 void PCalc_SP::markNonPrimes() {
     PCalc::at(0) = false;
     PCalc::at(1) = false;
 
-    int n = PCalc::array_size();
-    for(int i = 2; i < sqrt(n); i++) {
+    unsigned int n = PCalc::array_size();
+    unsigned srt = std::sqrt(n);
+
+    for(unsigned int i = 2; i < srt; i++) {
         if(PCalc::at(i)) {
-            for(int j = i*i; j < n; j += i) {
+            for(unsigned int j = i*i; j < n; j += i) {
                 PCalc::at(j) = false;
             }
         }

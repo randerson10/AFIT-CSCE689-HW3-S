@@ -35,9 +35,9 @@ class PCalc_T : PCalc {
 
     private:
         unsigned int _num_threads;
-        int _min_thread;
-        int _max_thread;
-        thread_data threads[];
+        unsigned int _min_thread;
+        unsigned int _max_thread;
+        thread_data *threads;
 };
 
 
